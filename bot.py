@@ -35,7 +35,7 @@ from aiogram.types import (
     WebAppInfo,
 )
 from PIL import Image, ImageOps, ImageFilter, ImageDraw
-from rembg import remove
+from rembg import remove, new_session
 from docx import Document
 from docx.shared import Cm, Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -139,6 +139,12 @@ def _decrypt_text(token: str | None) -> str | None:
 # HEMIS mini-app (Telegram WebApp) manzili. Bu domen PythonAnywhere (yoki
 # boshqa https hostingga) joylashtirilgach to'ldiriladi.
 HEMIS_WEBAPP_URL = os.getenv("HEMIS_WEBAPP_URL", "")
+
+# HEMIS xizmatini vaqtincha o'chirib qo'yish uchun (masalan hosting geo-blok
+# muammosi hal bo'lguncha). "true"/"false" - muhit o'zgaruvchisi orqali ham
+# boshqarish mumkin: HEMIS_SERVICE_ENABLED=false
+HEMIS_SERVICE_ENABLED = os.getenv("HEMIS_SERVICE_ENABLED", "false").strip().lower() == "true"
+HEMIS_UNAVAILABLE_TEXT = "🛠 Bu xizmat vaqtincha ishlamayapti. Keyinroq qaytadan urinib ko'ring."
 
 
 def db_init() -> None:
@@ -604,6 +610,11 @@ def _load_face_cascade() -> cv2.CascadeClassifier:
 
 FACE_CASCADE = _load_face_cascade()
 
+# rembg uchun yengil model ("u2netp", ~5MB) - standart "u2net" (~176MB) o'rniga.
+# Xotira tejash uchun sessiya bir marta yaratiladi va qayta ishlatiladi
+# (Railway kabi RAM-cheklangan hostinglarda process crash/OOM bo'lmasligi uchun muhim).
+_REMBG_SESSION = new_session("u2netp")
+
 def _build_bot() -> Bot:
     """PythonAnywhere bepul hisoblarida tashqi internetga faqat proxy orqali
     chiqish mumkin. Agar http(s)_proxy muhit o'zgaruvchisi mavjud bo'lsa (masalan
@@ -727,9 +738,17 @@ def make_3x4(image_bytes: bytes) -> Image.Image:
 
 def remove_bg_to_white(img: Image.Image) -> Image.Image:
     """Haqiqiy fonni olib tashlab, oq fon bilan almashtiradi."""
+    # Xotira sarfini kamaytirish uchun: rasm baribir 3x4ga kichraytiriladi,
+    # shuning uchun rembg'ga yuborishdan oldin ortiqcha katta rasmni
+    # cheklab qo'yamiz (RAM-cheklangan hostinglarda OOM bo'lmasligi uchun).
+    MAX_REMBG_DIMENSION = 1200
+    if max(img.size) > MAX_REMBG_DIMENSION:
+        img = img.copy()
+        img.thumbnail((MAX_REMBG_DIMENSION, MAX_REMBG_DIMENSION), Image.LANCZOS)
+
     buf = io.BytesIO()
     img.save(buf, format="PNG")
-    result_bytes = remove(buf.getvalue())  # shaffof fonli RGBA PNG
+    result_bytes = remove(buf.getvalue(), session=_REMBG_SESSION)  # shaffof fonli RGBA PNG
 
     fg = Image.open(io.BytesIO(result_bytes)).convert("RGBA")
 
@@ -816,7 +835,6 @@ def frame_photo(photo: Image.Image, border_width: int = 5, color=(0, 0, 0)) -> I
 
 def main_menu_kb(user_id: int) -> ReplyKeyboardMarkup:
     rows = [
-        [KeyboardButton(text="☰ Bosh menyu")],
         [KeyboardButton(text="📸 3x4 rasm"), KeyboardButton(text="🗂 Ma'lumotnoma")],
         [KeyboardButton(text="📋 Namuna"), KeyboardButton(text="📊 Holatim")],
         [KeyboardButton(text="🎓 HEMIS"), KeyboardButton(text="❓ Yordam")],
@@ -926,11 +944,6 @@ async def start_handler(message: Message):
         "chekini botga tashlashingiz kerak bo'ladi. Admin tekshirib tasdiqlagach, "
         "tayyor natija sizga avtomatik yuboriladi.".replace(",", " "),
         reply_markup=main_menu_kb(message.from_user.id),
-        parse_mode="HTML",
-    )
-    await message.answer(
-        "📋 <b>Bosh menyu</b>\n\nKerakli bo'limni tanlang:",
-        reply_markup=main_inline_menu_kb(message.from_user.id),
         parse_mode="HTML",
     )
 
@@ -1066,6 +1079,10 @@ async def nav_admin_callback(call: CallbackQuery):
 
 @dp.callback_query(F.data == "nav_hemis_menu")
 async def nav_hemis_menu_callback(call: CallbackQuery):
+    if not HEMIS_SERVICE_ENABLED:
+        await _show_menu_section(call, HEMIS_UNAVAILABLE_TEXT, _back_to_menu_kb())
+        await call.answer()
+        return
     account = db_get_hemis_account(call.from_user.id)
     if account:
         text = (
@@ -1287,6 +1304,9 @@ def _hemis_connect_kb() -> ReplyKeyboardMarkup | None:
 
 
 async def _hemis_connect_flow(send_target, user_id: int, state: FSMContext) -> None:
+    if not HEMIS_SERVICE_ENABLED:
+        await send_target.answer(HEMIS_UNAVAILABLE_TEXT)
+        return
     account = db_get_hemis_account(user_id)
     if account:
         await send_target.answer(
@@ -1329,6 +1349,9 @@ async def hemis_command(message: Message, state: FSMContext):
 async def hemis_webapp_data_handler(message: Message):
     """Mini-app (WebApp) formasidan yuborilgan login/parolni qabul qiladi."""
     logging.info(f"WEBAPP DATA KELDI: user={message.from_user.id}, raw={message.web_app_data.data!r}")
+    if not HEMIS_SERVICE_ENABLED:
+        await message.answer(HEMIS_UNAVAILABLE_TEXT)
+        return
     try:
         payload = json.loads(message.web_app_data.data)
     except Exception:
@@ -1366,6 +1389,9 @@ async def hemis_webapp_data_handler(message: Message):
 
 @dp.message(Command("hemis_uzish"))
 async def hemis_disconnect_command(message: Message):
+    if not HEMIS_SERVICE_ENABLED:
+        await message.answer(HEMIS_UNAVAILABLE_TEXT)
+        return
     db_delete_hemis_account(message.from_user.id)
     await message.answer("✅ HEMIS hisobingiz uzildi.")
 
@@ -1446,6 +1472,9 @@ def _format_hemis_error(status: int) -> str:
 
 
 async def _send_baholarim(send_target, user_id: int) -> None:
+    if not HEMIS_SERVICE_ENABLED:
+        await send_target.answer(HEMIS_UNAVAILABLE_TEXT)
+        return
     account = db_get_hemis_account(user_id)
     if not account:
         await send_target.answer(
