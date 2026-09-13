@@ -4,5 +4,5 @@ opencv-python-headless
 numpy
 cryptography
 Pillow
-rembg
+rembg[cpu]
 python-docx
