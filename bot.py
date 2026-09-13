@@ -818,7 +818,9 @@ def main_menu_kb(user_id: int) -> ReplyKeyboardMarkup:
     rows = [
         [KeyboardButton(text="☰ Bosh menyu")],
         [KeyboardButton(text="📸 3x4 rasm"), KeyboardButton(text="🗂 Ma'lumotnoma")],
-        [KeyboardButton(text="📋 Namuna"), KeyboardButton(text="❌ Bekor qilish")],
+        [KeyboardButton(text="📋 Namuna"), KeyboardButton(text="📊 Holatim")],
+        [KeyboardButton(text="🎓 HEMIS"), KeyboardButton(text="❓ Yordam")],
+        [KeyboardButton(text="❌ Bekor qilish")],
     ]
     if is_admin(user_id):
         rows.append([KeyboardButton(text="⚙️ Admin panel")])
@@ -924,6 +926,11 @@ async def start_handler(message: Message):
         "chekini botga tashlashingiz kerak bo'ladi. Admin tekshirib tasdiqlagach, "
         "tayyor natija sizga avtomatik yuboriladi.".replace(",", " "),
         reply_markup=main_menu_kb(message.from_user.id),
+        parse_mode="HTML",
+    )
+    await message.answer(
+        "📋 <b>Bosh menyu</b>\n\nKerakli bo'limni tanlang:",
+        reply_markup=main_inline_menu_kb(message.from_user.id),
         parse_mode="HTML",
     )
 
@@ -1989,6 +1996,21 @@ async def namuna_handler(message: Message):
 @dp.message(F.text == "📋 Namuna")
 async def menu_namuna_button(message: Message):
     await namuna_handler(message)
+
+
+@dp.message(F.text == "📊 Holatim")
+async def menu_holatim_button(message: Message):
+    await holatim_command(message)
+
+
+@dp.message(F.text == "🎓 HEMIS")
+async def menu_hemis_button(message: Message, state: FSMContext):
+    await hemis_command(message, state)
+
+
+@dp.message(F.text == "❓ Yordam")
+async def menu_yordam_button(message: Message):
+    await yordam_command(message)
 
 
 def _more_relatives_kb() -> InlineKeyboardMarkup:
