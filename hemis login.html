@@ -7,80 +7,196 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   * { box-sizing: border-box; }
+
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --primary-light: #3b82f6;
+    --bg-soft: #eff4ff;
+  }
+
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: var(--tg-theme-bg-color, #ffffff);
-    color: var(--tg-theme-text-color, #000000);
-    padding: 20px;
+    background: linear-gradient(160deg, #eef3ff 0%, #f7faff 45%, #ffffff 100%);
+    color: var(--tg-theme-text-color, #0f172a);
+    padding: 0;
     margin: 0;
+    min-height: 100vh;
   }
-  h2 { font-size: 20px; margin-bottom: 4px; }
+
+  .wrap {
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 28px 20px 40px;
+  }
+
+  .logo-badge {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--primary-light), var(--primary-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    box-shadow: 0 10px 24px rgba(37, 99, 235, 0.25);
+    margin-bottom: 16px;
+  }
+
+  h2 {
+    font-size: 22px;
+    margin: 0 0 4px;
+    color: #0f172a;
+    font-weight: 700;
+  }
+
   p.subtitle {
-    color: var(--tg-theme-hint-color, #999999);
+    color: #64748b;
     font-size: 14px;
     margin-top: 0;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
+    line-height: 1.5;
   }
+
+  .card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: 0 8px 30px rgba(37, 99, 235, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
+    border: 1px solid #e6edff;
+  }
+
   label {
     font-weight: 600;
-    margin-top: 14px;
+    margin-top: 16px;
     display: block;
-    font-size: 14px;
+    font-size: 13px;
+    color: #334155;
   }
+  label:first-child { margin-top: 0; }
+
+  .input-wrap {
+    position: relative;
+    margin-top: 6px;
+  }
+
   input {
     width: 100%;
-    padding: 12px;
-    margin-top: 6px;
-    border-radius: 10px;
-    border: 1px solid var(--tg-theme-hint-color, #cccccc);
+    padding: 13px 14px;
+    border-radius: 12px;
+    border: 1.5px solid #dbe6ff;
     font-size: 16px;
-    background: var(--tg-theme-secondary-bg-color, #f5f5f5);
-    color: var(--tg-theme-text-color, #000000);
+    background: var(--bg-soft);
+    color: #0f172a;
+    transition: border-color 0.15s ease, background 0.15s ease;
   }
-  .hint { font-size: 12px; color: var(--tg-theme-hint-color, #999999); margin-top: 4px; }
+
+  input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: #ffffff;
+  }
+
+  .hint {
+    font-size: 12px;
+    color: #7d8aa3;
+    margin-top: 5px;
+    line-height: 1.4;
+  }
+
   button {
     width: 100%;
-    padding: 14px;
-    background: var(--tg-theme-button-color, #2481cc);
-    color: var(--tg-theme-button-text-color, #ffffff);
+    padding: 15px;
+    background: linear-gradient(135deg, var(--primary-light), var(--primary-dark));
+    color: #ffffff;
     border: none;
-    border-radius: 10px;
+    border-radius: 14px;
     font-size: 16px;
-    font-weight: 600;
-    margin-top: 22px;
+    font-weight: 700;
+    margin-top: 26px;
     cursor: pointer;
+    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
   }
+
+  button:active {
+    transform: translateY(1px) scale(0.99);
+    box-shadow: 0 6px 14px rgba(37, 99, 235, 0.28);
+  }
+
   #error {
-    color: #e53935;
-    font-size: 14px;
-    margin-top: 12px;
-    min-height: 18px;
+    color: #dc2626;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    padding: 0;
+    font-size: 13px;
+    margin-top: 14px;
+    min-height: 0;
+    text-align: center;
+    transition: all 0.15s ease;
   }
+  #error:not(:empty) {
+    padding: 10px;
+  }
+
   .lock-note {
     font-size: 12px;
-    color: var(--tg-theme-hint-color, #999999);
-    margin-top: 18px;
+    color: #7d8aa3;
+    margin-top: 22px;
     text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .divider-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-soft);
+    color: var(--primary-dark);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 999px;
+    margin-bottom: 18px;
   }
 </style>
 </head>
 <body>
-  <h2>🎓 HEMIS hisobingizga kiring</h2>
-  <p class="subtitle">Ma'lumotlaringiz faqat botga, shifrlangan holda yuboriladi.</p>
+<div class="wrap">
 
-  <label>Universitet domeni</label>
-  <input id="domain" type="text" placeholder="student.tuit.uz" autocomplete="off" autocapitalize="none">
-  <div class="hint">Faqat domen nomi, "https://" yozmang</div>
+  <div class="logo-badge">🎓</div>
+  <div class="divider-badge">🔒 Xavfsiz ulanish</div>
+  <h2>HEMIS hisobingizga kiring</h2>
+  <p class="subtitle">Ma'lumotlaringiz faqat botga, shifrlangan holda yuboriladi. Hech kim ko'ra olmaydi.</p>
 
-  <label>Login (talaba ID)</label>
-  <input id="login" type="text" placeholder="masalan: 12345678" autocomplete="username" autocapitalize="none">
+  <div class="card">
+    <label>🏫 Universitet nomi</label>
+    <div class="input-wrap">
+      <input id="domain" type="text" placeholder="student.tuit.uz" autocomplete="off" autocapitalize="none">
+    </div>
+    <div class="hint">"tuit" o'rniga o'z universitetingiz qisqartmasini yozing — masalan TATU uchun <b>student.tatu.uz</b>, TDIU uchun <b>student.tdiu.uz</b>, TUIT uchun <b>student.tuit.uz</b></div>
 
-  <label>Parol</label>
-  <input id="password" type="password" placeholder="••••••••" autocomplete="current-password">
+    <label>🆔 Login (talaba ID)</label>
+    <div class="input-wrap">
+      <input id="login" type="text" placeholder="masalan: 12345678" autocomplete="username" autocapitalize="none">
+    </div>
 
-  <button onclick="submitForm()">✅ Kirish</button>
-  <div id="error"></div>
+    <label>🔑 Parol</label>
+    <div class="input-wrap">
+      <input id="password" type="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+
+    <button onclick="submitForm()">✅ Kirish</button>
+    <div id="error"></div>
+  </div>
+
   <div class="lock-note">🔒 Parolingiz shifrlangan holda saqlanadi</div>
+
+</div>
 
 <script>
   const tg = window.Telegram.WebApp;
