@@ -1,0 +1,8 @@
+# Railway (Nixpacks) uchun qo'shimcha tizim paketlari.
+# Bu fayl bot.py bilan BIR XIL papkada (loyihaning tub papkasida) bo'lishi kerak.
+#
+# LibreOffice Writer'ni o'rnatadi - DOCX faylni PDF'ga aylantirish
+# (convert_docx_to_pdf funksiyasi) uchun kerak.
+
+[phases.setup]
+aptPkgs = ["libreoffice-writer"]
