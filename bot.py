@@ -443,9 +443,22 @@ async def hemis_login(base_url: str, login: str, password: str) -> tuple[str | N
                 json={"login": login, "password": password},
                 timeout=aiohttp.ClientTimeout(total=HEMIS_REQUEST_TIMEOUT),
             ) as resp:
-                if resp.status != 200:
+                status = resp.status
+                raw_text = await resp.text()
+                if status != 200:
+                    logging.warning(
+                        "HEMIS login 200 emas. URL=%s status=%s javob=%s",
+                        base_url + HEMIS_LOGIN_PATH, status, raw_text[:1000],
+                    )
                     return None, "auth"
-                data = await resp.json(content_type=None)
+                try:
+                    data = json.loads(raw_text)
+                except Exception:
+                    logging.warning(
+                        "HEMIS login javobi JSON emas. URL=%s javob=%s",
+                        base_url + HEMIS_LOGIN_PATH, raw_text[:1000],
+                    )
+                    return None, "auth"
     except aiohttp.ClientConnectorDNSError:
         logging.warning("HEMIS domeni topilmadi: %s", base_url)
         return None, "dns"
@@ -461,6 +474,10 @@ async def hemis_login(base_url: str, login: str, password: str) -> tuple[str | N
         else None
     ) or data.get("token") or data.get("access_token")
     if not token:
+        logging.warning(
+            "HEMIS login 200 qaytardi, lekin token topilmadi. URL=%s javob=%s",
+            base_url + HEMIS_LOGIN_PATH, json.dumps(data)[:1000],
+        )
         return None, "auth"
     return token, "ok"
 
