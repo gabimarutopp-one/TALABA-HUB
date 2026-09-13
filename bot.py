@@ -431,8 +431,11 @@ def _normalize_hemis_domain(text: str) -> str:
     return text
 
 
-async def hemis_login(base_url: str, login: str, password: str) -> str | None:
-    """HEMIS'ga kirib, token oladi. Muvaffaqiyatsiz bo'lsa None qaytaradi."""
+async def hemis_login(base_url: str, login: str, password: str) -> tuple[str | None, str]:
+    """HEMIS'ga kirib, token oladi.
+    Qaytaradi: (token yoki None, sabab_kodi).
+    sabab_kodi: "ok" | "dns" | "auth" | "error"
+    """
     try:
         async with aiohttp.ClientSession() as session:
             async with session.post(
@@ -441,11 +444,14 @@ async def hemis_login(base_url: str, login: str, password: str) -> str | None:
                 timeout=aiohttp.ClientTimeout(total=HEMIS_REQUEST_TIMEOUT),
             ) as resp:
                 if resp.status != 200:
-                    return None
+                    return None, "auth"
                 data = await resp.json(content_type=None)
+    except aiohttp.ClientConnectorDNSError:
+        logging.warning("HEMIS domeni topilmadi: %s", base_url)
+        return None, "dns"
     except Exception:
         logging.exception("HEMIS'ga ulanishda xatolik")
-        return None
+        return None, "error"
 
     # Turli HEMIS instansiyalari tokenni har xil joyda qaytarishi mumkin
     inner = data.get("data") if isinstance(data, dict) else None
@@ -454,7 +460,20 @@ async def hemis_login(base_url: str, login: str, password: str) -> str | None:
         if isinstance(inner, dict)
         else None
     ) or data.get("token") or data.get("access_token")
-    return token
+    if not token:
+        return None, "auth"
+    return token, "ok"
+
+
+def _format_hemis_login_error(reason: str) -> str:
+    if reason == "dns":
+        return (
+            "❌ Bunday domen topilmadi. Universitet HEMIS manzilini tekshirib, "
+            "qaytadan kiriting (masalan: <code>student.tesu.uz</code>)."
+        )
+    if reason == "auth":
+        return "❌ Login yoki parol noto'g'ri. Qaytadan tekshirib kiriting."
+    return "❌ HEMIS bilan bog'lanishda xatolik yuz berdi. Birozdan so'ng qaytadan urinib ko'ring."
 
 
 async def hemis_api_get(base_url: str, token: str, path: str, params: dict | None = None):
@@ -493,7 +512,7 @@ async def hemis_api_get_auto(user_id: int, account: dict, path: str, params: dic
     if not password:
         return data, status  # parol saqlanmagan - qayta login imkoni yo'q
 
-    new_token = await hemis_login(base_url, account["login"], password)
+    new_token, _reason = await hemis_login(base_url, account["login"], password)
     if not new_token:
         return data, status
 
@@ -1305,12 +1324,12 @@ async def hemis_webapp_data_handler(message: Message):
 
     base_url = _normalize_hemis_domain(domain_text)
     wait_msg = await message.answer("⏳ HEMIS tizimiga ulanmoqda...")
-    token = await hemis_login(base_url, login, password)
+    token, reason = await hemis_login(base_url, login, password)
 
     if not token:
         await wait_msg.edit_text(
-            "❌ Ulanib bo'lmadi. Domen, login yoki parol noto'g'ri bo'lishi mumkin.\n"
-            "/hemis orqali qaytadan urinib ko'ring."
+            _format_hemis_login_error(reason) + "\n\n/hemis orqali qaytadan urinib ko'ring.",
+            parse_mode="HTML",
         )
         return
 
@@ -1373,13 +1392,14 @@ async def hemis_password_handler(message: Message, state: FSMContext):
         return
 
     wait_msg = await message.answer("⏳ HEMIS tizimiga ulanmoqda...")
-    token = await hemis_login(base_url, login, password)
+    token, reason = await hemis_login(base_url, login, password)
     await state.clear()
 
     if not token:
         await wait_msg.edit_text(
-            "❌ Ulanib bo'lmadi. Domen, login yoki parol noto'g'ri bo'lishi mumkin.\n"
-            "Qaytadan urinish uchun /hemis buyrug'ini yuboring."
+            _format_hemis_login_error(reason)
+            + "\n\nQaytadan urinish uchun /hemis buyrug'ini yuboring.",
+            parse_mode="HTML",
         )
         return
 
