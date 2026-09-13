@@ -415,8 +415,15 @@ def is_admin(user_id: int) -> bool:
 
 def _normalize_hemis_domain(text: str) -> str:
     """Foydalanuvchi kiritgan domenni to'liq bazaviy URL'ga aylantiradi.
-    Masalan: 'student.tuit.uz' -> 'https://student.tuit.uz/rest/v1'"""
-    text = (text or "").strip().rstrip("/")
+    Masalan: 'student.tuit.uz' -> 'https://student.tuit.uz/rest/v1'
+    Agar foydalanuvchi faqat universitet qisqartmasini yozsa (masalan 'TISU',
+    'TERDU'), avtomatik 'student.<qisqartma>.uz' shakliga aylantiradi."""
+    text = (text or "").strip().rstrip("/").lower()
+
+    # Agar http/https va nuqta bo'lmasa - bu qisqartma (masalan "tisu")
+    if not text.startswith("http://") and not text.startswith("https://") and "." not in text:
+        text = f"student.{text}.uz"
+
     if not text.startswith("http://") and not text.startswith("https://"):
         text = "https://" + text
     if not text.endswith("/rest/v1"):
