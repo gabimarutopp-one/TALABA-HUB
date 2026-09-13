@@ -784,16 +784,23 @@ def main_menu_kb(user_id: int) -> ReplyKeyboardMarkup:
 
 def main_inline_menu_kb(user_id: int) -> InlineKeyboardMarkup:
     rows = [
-        [InlineKeyboardButton(text="📸 3x4 rasm", callback_data="nav_3x4")],
-        [InlineKeyboardButton(text="🗂 Ma'lumotnoma", callback_data="nav_malumotnoma")],
-        [InlineKeyboardButton(text="📋 Namuna", callback_data="nav_namuna")],
-        [InlineKeyboardButton(text="📊 Holatim", callback_data="nav_holatim")],
-        [InlineKeyboardButton(text="🎓 HEMIS", callback_data="nav_hemis_menu")],
-        [InlineKeyboardButton(text="❓ Yordam", callback_data="nav_yordam")],
+        [
+            InlineKeyboardButton(text="📸 3x4 rasm", callback_data="nav_3x4"),
+            InlineKeyboardButton(text="🗂 Ma'lumotnoma", callback_data="nav_malumotnoma"),
+        ],
+        [
+            InlineKeyboardButton(text="📋 Namuna", callback_data="nav_namuna"),
+            InlineKeyboardButton(text="📊 Holatim", callback_data="nav_holatim"),
+        ],
+        [
+            InlineKeyboardButton(text="🎓 HEMIS", callback_data="nav_hemis_menu"),
+            InlineKeyboardButton(text="❓ Yordam", callback_data="nav_yordam"),
+        ],
     ]
     if is_admin(user_id):
         rows.append([InlineKeyboardButton(text="⚙️ Admin panel", callback_data="nav_admin")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
+
 
 
 def hemis_submenu_kb(user_id: int) -> InlineKeyboardMarkup:
