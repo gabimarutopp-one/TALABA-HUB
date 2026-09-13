@@ -1276,6 +1276,7 @@ async def hemis_command(message: Message, state: FSMContext):
 @dp.message(F.web_app_data)
 async def hemis_webapp_data_handler(message: Message):
     """Mini-app (WebApp) formasidan yuborilgan login/parolni qabul qiladi."""
+    logging.info(f"WEBAPP DATA KELDI: user={message.from_user.id}, raw={message.web_app_data.data!r}")
     try:
         payload = json.loads(message.web_app_data.data)
     except Exception:
