@@ -1221,15 +1221,17 @@ class HemisAuth(StatesGroup):
     waiting_password = State()
 
 
-def _hemis_connect_kb() -> InlineKeyboardMarkup | None:
+def _hemis_connect_kb() -> ReplyKeyboardMarkup | None:
     """Agar mini-app manzili (HEMIS_WEBAPP_URL) sozlangan bo'lsa, forma
     ochadigan tugma qaytaradi. Aks holda None - bu holda chat orqali
     (matn yozib) ulanish oqimi ishlatiladi."""
     if HEMIS_WEBAPP_URL:
-        return InlineKeyboardMarkup(
-            inline_keyboard=[
-                [InlineKeyboardButton(text="🔐 HEMIS'ga kirish", web_app=WebAppInfo(url=HEMIS_WEBAPP_URL))]
-            ]
+        return ReplyKeyboardMarkup(
+            keyboard=[
+                [KeyboardButton(text="🔐 HEMIS'ga kirish", web_app=WebAppInfo(url=HEMIS_WEBAPP_URL))]
+            ],
+            resize_keyboard=True,
+            one_time_keyboard=True,
         )
     return None
 
