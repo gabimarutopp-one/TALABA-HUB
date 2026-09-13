@@ -1,0 +1,8 @@
+aiogram
+aiohttp
+opencv-python-headless
+numpy
+cryptography
+Pillow
+rembg
+python-docx
