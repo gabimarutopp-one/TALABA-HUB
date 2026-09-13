@@ -9,13 +9,47 @@
   * { box-sizing: border-box; }
   html, body { height: 100%; }
 
+  :root {
+    --bg: #0d0f1c;
+    --text: #ffffff;
+    --text-dim: #a6afd1;
+    --text-dim2: #9aa3c7;
+    --card-bg: rgba(255,255,255,0.06);
+    --card-border: rgba(255,255,255,0.14);
+    --input-bg: rgba(255,255,255,0.05);
+    --input-border: rgba(255,255,255,0.14);
+    --pill-bg: rgba(255,255,255,0.05);
+    --pill-border: rgba(255,255,255,0.12);
+    --ghost-bg: rgba(255,255,255,0.06);
+    --row-bg: rgba(255,255,255,0.05);
+    --row-border: rgba(255,255,255,0.1);
+    --accent: #8ee6ff;
+  }
+  body.light {
+    --bg: #eef1fb;
+    --text: #171a2b;
+    --text-dim: #4a5178;
+    --text-dim2: #5c638a;
+    --card-bg: rgba(255,255,255,0.7);
+    --card-border: rgba(23,26,43,0.1);
+    --input-bg: rgba(23,26,43,0.04);
+    --input-border: rgba(23,26,43,0.15);
+    --pill-bg: rgba(23,26,43,0.04);
+    --pill-border: rgba(23,26,43,0.12);
+    --ghost-bg: rgba(23,26,43,0.05);
+    --row-bg: rgba(23,26,43,0.04);
+    --row-border: rgba(23,26,43,0.1);
+    --accent: #2179a8;
+  }
+
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     margin: 0;
-    background: #0d0f1c;
-    color: #fff;
+    background: var(--bg);
+    color: var(--text);
     overflow-x: hidden;
     position: relative;
+    transition: background 0.25s ease, color 0.25s ease;
   }
 
   /* Animatsiyali fon shar-shar gradient */
@@ -27,6 +61,7 @@
     z-index: 0;
     animation: float 10s ease-in-out infinite;
   }
+  body.light .blob { opacity: 0.25; }
   .blob1 { width: 260px; height: 260px; background: #6d5bff; top: -60px; left: -60px; }
   .blob2 { width: 220px; height: 220px; background: #00d4ff; bottom: -40px; right: -40px; animation-delay: 2s; }
   .blob3 { width: 180px; height: 180px; background: #ff5ba1; top: 40%; right: -60px; animation-delay: 4s; }
@@ -59,9 +94,23 @@
     background: linear-gradient(135deg, #6d5bff, #00d4ff);
     display: flex; align-items: center; justify-content: center;
     font-size: 20px;
+    flex-shrink: 0;
   }
-  .top-brand .title { font-weight: 800; font-size: 17px; letter-spacing: 0.3px; }
-  .top-brand .sub { font-size: 11px; color: #9aa3c7; }
+  .top-brand .title { font-weight: 800; font-size: 17px; letter-spacing: 0.3px; color: var(--text); }
+  .top-brand .sub { font-size: 11px; color: var(--text-dim2); }
+
+  .theme-toggle {
+    margin-left: auto;
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    border: 1.5px solid var(--card-border);
+    background: var(--card-bg);
+    color: var(--text);
+    font-size: 17px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
 
   /* Progress dots */
   .progress {
@@ -73,7 +122,7 @@
     flex: 1;
     height: 5px;
     border-radius: 6px;
-    background: rgba(255,255,255,0.12);
+    background: rgba(140,140,160,0.2);
     overflow: hidden;
   }
   .progress .seg .fill {
@@ -86,13 +135,13 @@
   .progress .seg.active .fill { width: 100%; }
 
   .glass-card {
-    background: rgba(255,255,255,0.06);
+    background: var(--card-bg);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
-    border: 1px solid rgba(255,255,255,0.14);
+    border: 1px solid var(--card-border);
     border-radius: 24px;
     padding: 24px 20px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
     min-height: 300px;
     display: flex;
     flex-direction: column;
@@ -110,7 +159,7 @@
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 1.2px;
-    color: #8ee6ff;
+    color: var(--accent);
     font-weight: 700;
     margin-bottom: 6px;
   }
@@ -118,10 +167,11 @@
     font-size: 20px;
     font-weight: 800;
     margin: 0 0 4px;
+    color: var(--text);
   }
   .step-desc {
     font-size: 13px;
-    color: #a6afd1;
+    color: var(--text-dim);
     margin: 0 0 20px;
   }
 
@@ -132,9 +182,9 @@
     padding: 14px 16px;
     margin-bottom: 10px;
     border-radius: 16px;
-    background: rgba(255,255,255,0.05);
-    border: 1.5px solid rgba(255,255,255,0.12);
-    color: #fff;
+    background: var(--pill-bg);
+    border: 1.5px solid var(--pill-border);
+    color: var(--text);
     font-size: 14.5px;
     font-weight: 600;
     cursor: pointer;
@@ -143,7 +193,7 @@
   .pill-option:active { transform: scale(0.98); }
   .pill-option.selected {
     background: linear-gradient(90deg, rgba(109,91,255,0.35), rgba(0,212,255,0.2));
-    border-color: #8ee6ff;
+    border-color: var(--accent);
   }
 
   .option-list {
@@ -156,14 +206,14 @@
     width: 100%;
     padding: 15px 16px;
     border-radius: 16px;
-    border: 1.5px solid rgba(255,255,255,0.14);
+    border: 1.5px solid var(--input-border);
     font-size: 15px;
-    background: rgba(255,255,255,0.05);
-    color: #fff;
+    background: var(--input-bg);
+    color: var(--text);
     margin-bottom: 14px;
   }
-  input::placeholder { color: #7d86ab; }
-  input:focus { outline: none; border-color: #8ee6ff; }
+  input::placeholder { color: var(--text-dim2); }
+  input:focus { outline: none; border-color: var(--accent); }
 
   .input-icon-wrap { position: relative; }
   .toggle-eye {
@@ -172,7 +222,7 @@
     top: 15px;
     background: none;
     border: none;
-    color: #9aa3c7;
+    color: var(--text-dim2);
     font-size: 17px;
     cursor: pointer;
   }
@@ -199,10 +249,15 @@
     box-shadow: 0 10px 24px rgba(109,91,255,0.35);
   }
   .btn-ghost {
-    background: rgba(255,255,255,0.06);
-    color: #fff;
-    border: 1.5px solid rgba(255,255,255,0.14);
+    background: var(--ghost-bg);
+    color: var(--text);
+    border: 1.5px solid var(--card-border);
     flex: 0 0 90px;
+  }
+  .btn-outline {
+    background: transparent;
+    color: var(--accent);
+    border: 1.5px solid var(--accent);
   }
   .btn:disabled { opacity: 0.4; }
 
@@ -219,10 +274,22 @@
     gap: 8px;
     align-items: flex-start;
     font-size: 11.5px;
-    color: #8f98bd;
+    color: var(--text-dim2);
     margin-top: 16px;
     line-height: 1.4;
   }
+
+  .remember-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .remember-row input { width: auto; margin: 0; }
 
   .summary-chip {
     display: inline-flex;
@@ -230,7 +297,7 @@
     gap: 6px;
     background: rgba(142,230,255,0.12);
     border: 1px solid rgba(142,230,255,0.3);
-    color: #8ee6ff;
+    color: var(--accent);
     padding: 6px 12px;
     border-radius: 999px;
     font-size: 12px;
@@ -243,13 +310,13 @@
   .spinner {
     width: 34px; height: 34px;
     border-radius: 50%;
-    border: 3px solid rgba(255,255,255,0.15);
-    border-top-color: #8ee6ff;
+    border: 3px solid rgba(140,140,160,0.25);
+    border-top-color: var(--accent);
     animation: spin 0.8s linear infinite;
     margin: 30px auto 14px;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .loading-text { text-align: center; color: #a6afd1; font-size: 13px; }
+  .loading-text { text-align: center; color: var(--text-dim); font-size: 13px; }
 
   .result-scroll {
     flex: 1;
@@ -260,7 +327,7 @@
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: #8ee6ff;
+    color: var(--accent);
     font-weight: 700;
     margin: 16px 0 8px;
   }
@@ -270,20 +337,20 @@
     justify-content: space-between;
     align-items: center;
     gap: 10px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: var(--row-bg);
+    border: 1px solid var(--row-border);
     border-radius: 14px;
     padding: 12px 14px;
     margin-bottom: 8px;
     font-size: 13.5px;
   }
-  .row-card .name { color: #eaeefc; }
+  .row-card .name { color: var(--text); }
   .row-card .value {
     font-weight: 800;
-    color: #8ee6ff;
+    color: var(--accent);
     white-space: nowrap;
   }
-  .empty-note { color: #7d86ab; font-size: 13px; text-align: center; padding: 10px 0; }
+  .empty-note { color: var(--text-dim2); font-size: 13px; text-align: center; padding: 10px 0; }
 </style>
 </head>
 <body>
@@ -300,6 +367,7 @@
       <div class="title">HEMIS Ulanish</div>
       <div class="sub">3 ta oddiy qadam</div>
     </div>
+    <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()">🌙</button>
   </div>
 
   <div class="progress">
@@ -352,6 +420,11 @@
         <button type="button" class="toggle-eye" onclick="togglePassword()">👁</button>
       </div>
 
+      <label class="remember-row">
+        <input type="checkbox" id="rememberMe" checked>
+        <span>Login/parolni eslab qolish (keyingi safar qayta kiritmaslik uchun)</span>
+      </label>
+
       <div id="error"></div>
 
       <div class="nav-row">
@@ -360,7 +433,7 @@
       </div>
 
       <div class="safe-note">
-        🛡️ <span>Parolingiz faqat HEMIS serveriga yuboriladi va bot xabarlarida saqlanmaydi.</span>
+        🛡️ <span>Parolingiz faqat HEMIS serveriga yuboriladi. "Eslab qolish" belgilansa, login/parol shu qurilmaning brauzerida (shifrlanmagan holda) saqlanadi — faqat o'zingizning shaxsiy qurilmangizda foydalaning.</span>
       </div>
     </div>
 
@@ -375,15 +448,19 @@
         <span class="summary-chip" id="resultChip">🏛 —</span>
         <div class="result-scroll" id="resultScroll"></div>
         <div class="nav-row">
-          <button class="btn btn-ghost" onclick="goStep(3)">← Orqaga</button>
+          <button class="btn btn-outline" style="flex:0 0 auto; padding:12px 16px;" onclick="openOriginalSite()">🌐 Original sayt</button>
           <button class="btn btn-primary" onclick="closeApp()">✅ Yopish</button>
+        </div>
+        <div class="nav-row" style="margin-top:8px; padding-top:0;">
+          <button class="btn btn-ghost" style="flex:1;" onclick="forgetAccount()">🚪 Hisobni unutish</button>
         </div>
       </div>
 
       <div id="resultErrorBlock" style="display:none; flex:1; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
         <div style="font-size:34px; margin-bottom:10px;">⚠️</div>
         <div id="resultErrorText" style="color:#ff8fa1; font-size:14px; margin-bottom:20px;"></div>
-        <button class="btn btn-primary" style="flex:0 0 auto; padding:12px 24px;" onclick="goStep(3)">← Qaytadan urinish</button>
+        <button class="btn btn-primary" style="flex:0 0 auto; padding:12px 24px; margin-bottom:10px;" onclick="retryAfterError()">← Qaytadan urinish</button>
+        <button class="btn btn-ghost" style="flex:0 0 auto; padding:10px 20px;" onclick="forgetAccount()">🚪 Boshqa hisob bilan kirish</button>
       </div>
     </div>
 
@@ -399,6 +476,33 @@
   // backend manzilingizni yozing, oxirida "/" bo'lmasin. Masalan:
   // const API_BASE = "https://hemis-api-XXXX.onrender.com";
   const API_BASE = "https://aspirin-trombone-buffing.ngrok-free.dev";
+
+  const STORAGE_KEY = "hemis_saved_account_v1";
+  const THEME_KEY = "hemis_theme";
+
+  function applyTheme(theme) {
+    const btn = document.getElementById('themeToggleBtn');
+    if (theme === 'light') {
+      document.body.classList.add('light');
+      if (btn) btn.textContent = '☀️';
+    } else {
+      document.body.classList.remove('light');
+      if (btn) btn.textContent = '🌙';
+    }
+  }
+
+  function toggleTheme() {
+    const isLight = document.body.classList.contains('light');
+    const next = isLight ? 'dark' : 'light';
+    applyTheme(next);
+    try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+  }
+
+  (function initTheme() {
+    let saved = null;
+    try { saved = localStorage.getItem(THEME_KEY); } catch (e) {}
+    applyTheme(saved || 'dark');
+  })();
 
   const DATA = {
     "Toshkent shahri": [
@@ -628,6 +732,50 @@
     }
   }
 
+  function saveAccount(domain, login, password, uniLabel) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ domain, login, password, uniLabel }));
+    } catch (e) {}
+  }
+
+  function loadAccount() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function forgetAccount() {
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    document.getElementById('login').value = '';
+    document.getElementById('password').value = '';
+    selectedRegion = null;
+    selectedUniName = null;
+    selectedDomain = null;
+    goStep(1);
+  }
+
+  function retryAfterError() {
+    const saved = loadAccount();
+    if (saved) {
+      performLogin(saved.domain, saved.login, saved.password, saved.uniLabel, false);
+    } else {
+      goStep(3);
+    }
+  }
+
+  function openOriginalSite() {
+    const saved = loadAccount();
+    const rawDomain = (saved && saved.domain) || selectedDomain || manualInput.value.trim();
+    // "https://student.xxx.uz/rest/v1" -> "https://student.xxx.uz"
+    let siteUrl = rawDomain;
+    if (!/^https?:\/\//i.test(siteUrl)) siteUrl = "https://" + siteUrl;
+    siteUrl = siteUrl.replace(/\/rest\/v1\/?$/, "");
+    tg.openLink(siteUrl);
+  }
+
   async function submitForm() {
     const errorEl = document.getElementById('error');
     errorEl.textContent = "";
@@ -635,6 +783,7 @@
     const domain = selectedDomain || manualInput.value.trim();
     const login = document.getElementById('login').value.trim();
     const password = document.getElementById('password').value;
+    const remember = document.getElementById('rememberMe').checked;
     const uniLabel = (selectedUniName === "Boshqa" || selectedRegion === OTHER)
       ? (manualInput.value.trim() || domain)
       : selectedUniName;
@@ -644,6 +793,10 @@
       return;
     }
 
+    await performLogin(domain, login, password, uniLabel, remember);
+  }
+
+  async function performLogin(domain, login, password, uniLabel, remember) {
     goStep(4);
     showLoading();
 
@@ -678,14 +831,23 @@
         return;
       }
 
+      if (remember) {
+        saveAccount(loginJson.domain, login, password, uniLabel);
+      }
+
       renderResults(uniLabel, dataJson.gpa, dataJson.subjects);
     } catch (e) {
       showResultError("❌ Serverga ulanib bo'lmadi. Internetni tekshiring yoki keyinroq urinib ko'ring.");
     }
   }
 
-  renderRegions();
-  goStep(1);
+  const savedAccount = loadAccount();
+  if (savedAccount) {
+    performLogin(savedAccount.domain, savedAccount.login, savedAccount.password, savedAccount.uniLabel, false);
+  } else {
+    renderRegions();
+    goStep(1);
+  }
 </script>
 </body>
 </html>
