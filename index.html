@@ -310,9 +310,14 @@ P.back='M19 12H5M11 6l-6 6 6 6';
 const $=id=>document.getElementById(id);
 const TGW=window.Telegram&&Telegram.WebApp; if(TGW){ TGW.ready(); TGW.expand(); }
 const INIT=()=>(TGW&&TGW.initData)||'';
-const photoUrl=v=>'/api/photo?q='+encodeURIComponent(v.img)+'&d='+encodeURIComponent(INIT());
+// MUHIM: bu yerga backend (bot.py) ishlaydigan manzilni yozing - masalan
+// ngrok bergan https://....ngrok-free.dev manzil, YOKI backendni doimiy
+// serverga (Railway/Render) joylashtirgan bo'lsangiz o'sha manzil.
+// Oxirida "/" BO'LMASIN.
+const API_BASE = "https://sizning-backend-manzilingiz.ngrok-free.dev";
+const photoUrl=v=>API_BASE+'/api/photo?q='+encodeURIComponent(v.img)+'&d='+encodeURIComponent(INIT());
 async function api(body){
-  const r=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json','X-Init-Data':INIT()},body:JSON.stringify(body)});
+  const r=await fetch(API_BASE+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json','X-Init-Data':INIT(),'ngrok-skip-browser-warning':'true'},body:JSON.stringify(body)});
   const d=await r.json().catch(()=>({})); if(!r.ok) throw {code:d.code||('http_'+r.status)}; return d;
 }
 const shimSample=(()=>{
@@ -320,7 +325,7 @@ const shimSample=(()=>{
   f.json=async p=>(await api({prompt:p,json:true})).data; return f;
 })();
 const shimDl={save:async({filename,data})=>{
-  const r=await fetch('/api/send',{method:'POST',headers:{'X-Init-Data':INIT(),'X-Filename':encodeURIComponent(filename)},body:typeof data==='string'?new Blob([data],{type:'text/html'}):data});
+  const r=await fetch(API_BASE+'/api/send',{method:'POST',headers:{'X-Init-Data':INIT(),'X-Filename':encodeURIComponent(filename),'ngrok-skip-browser-warning':'true'},body:typeof data==='string'?new Blob([data],{type:'text/html'}):data});
   if(!r.ok) throw {code:'send_failed'}; toast('Fayl chatga yuborildi');
 }};
 const cap = async n=> n==='sample'?shimSample : n==='downloads'?shimDl : null;
@@ -406,7 +411,7 @@ async function download(t){
       let sl=X.addSlide(); sl.background={color:'05070D'};
       sl.addShape(X.ShapeType.rect,{x:.8,y:2.2,w:1.4,h:.1,...bar});
       sl.addText(d.title,{x:.8,y:2.5,w:11.7,h:1.8,fontSize:40,bold:true,color:'FFFFFF',fontFace:'Arial',valign:'top'});
-      const pngs=await Promise.all(d.slides.map(async v=>{ if(!v.hasPhoto) return null; try{ const b=await (await fetch(photoUrl(v))).blob(); return await new Promise(r=>{ const f=new FileReader(); f.onload=()=>r(String(f.result).replace(/^data:/,'')); f.readAsDataURL(b); }); }catch(e){ return null; } }));
+      const pngs=await Promise.all(d.slides.map(async v=>{ if(!v.hasPhoto) return null; try{ const b=await (await fetch(photoUrl(v),{headers:{'ngrok-skip-browser-warning':'true'}})).blob(); return await new Promise(r=>{ const f=new FileReader(); f.onload=()=>r(String(f.result).replace(/^data:/,'')); f.readAsDataURL(b); }); }catch(e){ return null; } }));
       d.slides.forEach((v,i)=>{
         sl=X.addSlide(); sl.background={color:'0A0F1C'};
         sl.addShape(X.ShapeType.rect,{x:0,y:0,w:.25,h:7.5,...bar});
@@ -437,7 +442,7 @@ function svgPng(x){ return new Promise(r=>{ const i=new Image(); i.onload=()=>{ 
 async function addImages(t){
   t.imgBusy=true; t.imgErr=false; if(cur===t.id) renderTask();
   let ok=0;
-  await Promise.all(t.result.slides.map(async v=>{ if(!v.img) return; try{ const r=await fetch(photoUrl(v)); if(r.ok){ v.hasPhoto=true; ok++; } }catch(e){} }));
+  await Promise.all(t.result.slides.map(async v=>{ if(!v.img) return; try{ const r=await fetch(photoUrl(v),{headers:{'ngrok-skip-browser-warning':'true'}}); if(r.ok){ v.hasPhoto=true; ok++; } }catch(e){} }));
   if(!ok) t.imgErr=true;
   t.imgBusy=false; save(); renderRecent(); if(cur===t.id) renderTask();
 }
