@@ -314,7 +314,7 @@ const INIT=()=>(TGW&&TGW.initData)||'';
 // ngrok bergan https://....ngrok-free.dev manzil, YOKI backendni doimiy
 // serverga (Railway/Render) joylashtirgan bo'lsangiz o'sha manzil.
 // Oxirida "/" BO'LMASIN.
-const API_BASE = "https://sizning-backend-manzilingiz.ngrok-free.dev";
+const API_BASE = "https://aspirin-trombone-buffing.ngrok-free.dev";
 const photoUrl=v=>API_BASE+'/api/photo?q='+encodeURIComponent(v.img)+'&d='+encodeURIComponent(INIT());
 async function api(body){
   const r=await fetch(API_BASE+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json','X-Init-Data':INIT(),'ngrok-skip-browser-warning':'true'},body:JSON.stringify(body)});
